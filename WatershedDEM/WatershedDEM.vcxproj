@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Cell.h" />
+    <ClInclude Include="WatershedAlgorithm.h" />
     <ClInclude Include="WatershedStructure.h" />
   </ItemGroup>
   <ItemGroup>

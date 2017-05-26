@@ -12,9 +12,18 @@ public:
 			for (unsigned x = 0; x < width; x++)
 				cells.push_back(new Cell(x, y, data[x + y*width]));
 
-		//计算每个栅格邻域栅格
-		for(int y=0;y<height;)
-
+		std::sort(cells.begin(), cells.end(), [](Cell *pl, Cell *pr) {return pl < pr; });
 	}
 
+	~WatershedStructure() {
+		while (!cells.empty()) {
+			Cell *p = cells.back();
+			delete p;
+			p = NULL;
+			cells.pop_back();
+		}
+	}
+
+	int size() { return cells.size(); }
+	Cell * at(int i) { return cells.at(i); }
 };
