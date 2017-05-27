@@ -1,8 +1,18 @@
-#include <iostream>
+#include<iostream>
 
-using namespace std;
+#include"WatershedAlgorithm.h"
+
 
 int main(void)
 {
-	std::cout << "test" << std::endl;
+	std::cout << "Watershed:" << std::endl;
+	
+	std::string input = "D:\\TempData\\watershed\\gel.tif";
+	std::string output = "D:\\TempData\\watershed\\gel_out.tif";
+
+	WatershedAlgorithm wa(input, output);
+	wa.run();
+
+	return 0;
+
 }

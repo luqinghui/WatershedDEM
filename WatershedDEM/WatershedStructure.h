@@ -12,7 +12,7 @@ public:
 			for (unsigned x = 0; x < width; x++)
 				cells.push_back(new Cell(x, y, data[x + y*width]));
 
-		std::sort(cells.begin(), cells.end(), [](Cell *pl, Cell *pr) {return pl < pr; });
+		std::sort(cells.begin(), cells.end(), [](Cell *pl, Cell *pr) {return pl->getElevation() < pr->getElevation(); });
 	}
 
 	~WatershedStructure() {
