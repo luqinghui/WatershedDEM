@@ -42,7 +42,7 @@ public:
 			}
 		}
 
-		std::sort(cells.begin(), cells.end(), [](Cell *pl, Cell *pr) {return pl->getElevation() < pr->getElevation(); });
+		std::sort(cells.begin(), cells.end(), [](Cell *pl, Cell *pr) {return pl->getIntHeight() < pr->getIntHeight(); });
 	}
 
 	~WatershedStructure() {

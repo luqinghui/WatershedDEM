@@ -7,8 +7,8 @@ int main(void)
 {
 	std::cout << "Watershed:" << std::endl;
 	
-	std::string input = "D:\\TempData\\watershed\\gel.tif";
-	std::string output = "D:\\TempData\\watershed\\gel_out.tif";
+	std::string input = "D:\\TempData\\Tibet.tif";
+	std::string output = "D:\\TempData\\Tibet_ws_label.tif";
 
 	WatershedAlgorithm wa(input, output);
 	wa.run();

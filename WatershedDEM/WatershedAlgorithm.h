@@ -8,14 +8,16 @@
 #include<cpl_conv.h>
 
 class WatershedAlgorithm {
-	float HMIN;
-	float HMAX;
+	int HMIN, HMAX;
 	int width;
 	int height;
 	float *data;
+	int *result;
 
 	GDALDataset *inputDataset;
 	GDALDataset *outputDataset;
+
+	double adfGeoTransform[6];
 
 	std::string inImg;
 	std::string outImg;
@@ -32,18 +34,22 @@ public:
 		}
 		width = inputDataset->GetRasterXSize();
 		height = inputDataset->GetRasterYSize();
+		inputDataset->GetGeoTransform(adfGeoTransform);
+
 		GDALRasterBand *poBand = inputDataset->GetRasterBand(1);
 
 		data = new float[width*height];
 		poBand->RasterIO(GF_Read, 0, 0, width, height, data, width, height, GDT_Float32, 0, 0);
-
-		HMIN = poBand->GetMinimum();
-		HMAX = poBand->GetMaximum();
+		
+		GDALClose(inputDataset);
 	}
 
 	void run() {
 		//第一步:将栅格存入结构体并排序
 		WatershedStructure watershedStructure(data, width, height);
+
+		HMIN = watershedStructure.at(0)->getIntHeight();
+		HMAX = watershedStructure.at(watershedStructure.size() - 1)->getIntHeight();
 
 		//第二步:模拟浸没
 		std::queue<Cell*> cell_queue;	//存储栅格的临时队列
@@ -55,7 +61,7 @@ public:
 			for (int cell_index = height_index1; cell_index < watershedStructure.size(); ++cell_index) {
 				Cell* c = watershedStructure.at(cell_index);
 
-				if (c->getElevation() != h) { height_index1 = cell_index; break; }	//此栅格位于h+1层，暂不处理，跳出循环
+				if (c->getIntHeight() != h) { height_index1 = cell_index; break; }	//此栅格位于h+1层，暂不处理，跳出循环
 
 				c->setLableToMASK();
 
@@ -158,20 +164,22 @@ public:
 		}
 
 		char **papszOptions = NULL;
-		outputDataset = poDriver->CreateCopy(outImg.c_str(), inputDataset, false, papszOptions, NULL, NULL);
+		outputDataset = poDriver->Create(outImg.c_str(), width, height, 1, GDT_Int32, papszOptions);
+		outputDataset->SetGeoTransform(adfGeoTransform);
+
+		result = (int *)malloc(width*height*sizeof(int));
 
 		for (int i = 0; i < watershedStructure.size(); i++) {
 			Cell* p = watershedStructure.at(i);
-			if (p->isLabelWSHED() && !p->allNeighboursAreWSHED())
-				data[p->getX() + p->getY()*width] = 1;
+			result[p->getX() + p->getY()*width] = p->getLabel();
+			/*if (p->isLabelWSHED() && !p->allNeighboursAreWSHED())
+				result[p->getX() + p->getY()*width] = 1;
 			else
-				data[p->getX() + p->getY()*width] = 0;
-
+				result[p->getX() + p->getY()*width] = 0;*/
 		}
 
 		GDALRasterBand *outputBand = outputDataset->GetRasterBand(1);
-		outputBand->RasterIO(GF_Write, 0, 0, width, height, data, width, width, GDT_Float32, 0, 0);
-		GDALClose(inputDataset);
+		outputBand->RasterIO(GF_Write, 0, 0, width, height, result, width, height, GDT_Int32, 0, 0);
 		GDALClose(outputDataset);
 	}
 };
